@@ -3,7 +3,6 @@ from utils.aoc_utils import AOCDay, day
 @day(1)
 class Day1(AOCDay):
     def common(self):
-        print(int(self.inputData[-1]))
         self.sonarSweep = [int(x) for x in self.inputData]
         return 0
 
