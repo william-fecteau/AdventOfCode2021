@@ -1,73 +1,69 @@
+from numpy.lib.shape_base import apply_along_axis
 from utils.aoc_utils import AOCDay, day
+import numpy as np
 
 @day(3)
 class Day3(AOCDay):
     def common(self):
-        # Get the lenght of one binary number (Assuming all numbers have same length)
-        self.binLength = len(self.inputData[0])
-        
-        # Creating a list with lists containing every bit in that position
-        self.bitLists = [[] for i in range(self.binLength)]
-        
+        # Make a matrix of boolean values
+        allLines = []
         for line in self.inputData:
-            for i in range(self.binLength):
-                # index 0 will contain the less significant bit (LSB)
-                self.bitLists[i].append(int(line[i]))
+            allLines.append([bit == "1" for bit in line])
         
-        self.mostCommonBitInLst = self.compareBits(self.bitLists)
-
-
-    # Return a list with the most common bit for each position in the array
-    def compareBits(self, bitLists):
-        result = []
+        # Transfer that matrix to np format
+        self.bitMatrix = np.array(allLines)
+        self.rows = self.bitMatrix.shape[0]
+        self.columns = self.bitMatrix.shape[1]
         
-        for bitLst in bitLists:
-            nbOne = sum(bitLst)
-            nbZero = len(bitLst) - nbOne
-
-            if (nbOne > nbZero): 
-                result.append(1)
-            else:
-                result.append(0)
-        
-        return result
-
-    def part1(self):        
-        # Looping through list in reverse because index 0 is LSB
-        strEpsilon = ''.join([str(x) for x in self.mostCommonBitInLst[::-1]])
-        
-        # Inverting 0s and 1s for gamma
-        strGamma = ''.join(['1' if i == '0' else '0' for i in strEpsilon])
-        
-        return int(strEpsilon, 2) * int(strGamma, 2)
-
-    def column(self, matrix, i):
-        # Too lazy to learn numpy
-        return [row[i] for row in matrix]
-    
-    def evaluateCriteria(self, inputMatrix, isLeastCommon):
-        columnToCheck = self.column(inputMatrix, 0)
-        nbOne = sum(columnToCheck)
-        nbZero = len(columnToCheck) - nbOne
-            
-        bitToKeep = 0        
-        if (isLeastCommon and nbOne < nbZero or not isLeastCommon and nbOne >= nbZero):
-            bitToKeep = 1
-        
-        for i in range(len(columnToCheck)):
-            if (columnToCheck[i] != bitToKeep):
-                inputMatrix.remove(inputMatrix[i])
         return 0
-    
-    def part2(self):
-        # Putting everything in a matrix cuz im tired
-        inputMatrix = []
-        
-        for bin in self.inputData:
-            inputMatrix.append([int(bit) for bit in bin])
-            
-        result1 = self.evaluateCriteria(inputMatrix, True)
-            
 
-            
-        return 0
+    def part1(self):
+        gamma = ""
+        for i in range(self.columns):
+            # Bit sum of the column
+            ones = sum(self.bitMatrix[:,i])
+            # Check if the number of ones is greater than the number of zeros
+            condition = ones > self.rows - ones
+            gamma += str(int(condition))
+        
+        # Inverting bits of the gamma factor
+        epsilon = "".join(["0" if x == "1" else "1" for x in gamma])
+
+        return int(gamma, 2) * int(epsilon, 2)
+    
+    
+    def applyBitCriteriaRec(self, n, matrix, isMostCommon):
+        rows = matrix.shape[0]
+        columns = matrix.shape[1]
+
+        # Base case: only one left, return it        
+        if rows == 1:
+            return matrix[0,:]
+        
+        # Induction step: apply bit criteria
+        
+        ones = sum(matrix[:,n])
+        # Check if the number of ones is greater than the number of zeros
+        valueToKeep = ones >= rows - ones
+        
+        # Inverting value to keep depending of the parameter we have
+        if (not isMostCommon):
+            valueToKeep = not valueToKeep
+        
+        # In reverse order to not fuck up indexes while deleting
+        rowsToDelete = [i for i in range(rows-1, -1, -1) if matrix[i,n] != valueToKeep]
+        for rowI in rowsToDelete:
+            matrix = np.delete(matrix, rowI, 0)
+                
+        n += 1
+        
+        result = self.applyBitCriteriaRec(n, matrix, isMostCommon)
+        return "".join([str(int(bit)) for bit in result])
+    
+    
+    def part2(self):        
+        oxygen = self.applyBitCriteriaRec(0, self.bitMatrix, True)
+        
+        co2 = self.applyBitCriteriaRec(0, self.bitMatrix, False)
+
+        return int(oxygen, 2) * int(co2, 2)
