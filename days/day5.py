@@ -10,9 +10,9 @@ class Day5(AOCDay):
             startX, startY = lineStart.split(",")
             endX, endY = lineEnd.split(",")
             self.ventLines.append([(int(startX), int(startY)), (int(endX), int(endY))])
-        
+
+        # Build seaMap with only horizontal/vertical     
         self.seaMap = np.zeros((1000,1000))
-        # Build seaMap with only horizontal/vertical
         self.buildSeaMap(self.seaMap, False)
         
         return 0
@@ -58,7 +58,6 @@ class Day5(AOCDay):
 
 
     def part1(self):
-        print(self.seaMap)
         return self.countOverlapInSeaMap(self.seaMap)
     
     def part2(self):
