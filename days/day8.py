@@ -68,13 +68,15 @@ class Day8(AOCDay):
 
             # Fiouf last segment, king of bruteforcing it at this point lol
             segmentSet.add(segments[6])
-            segments[4] = {'a', 'b', 'c', 'd', 'e', 'f', 'g'}.difference(segmentSet).pop()
+            segments[4] = eight.difference(segmentSet).pop()
             
             # Hardcoding remaining digit cause we have all segments
             two = {segments[0], segments[2], segments[3], segments[4], segments[6]}
             five = {segments[0], segments[1], segments[3], segments[5], segments[6]}
-            eight = {segments[0], segments[1], segments[2], segments[5], segments[6]}
+            nine = {segments[0], segments[1], segments[2], segments[3], segments[5], segments[6]}
+            zero = {segments[0], segments[1], segments[2], segments[4], segments[5], segments[6]}
             
+            # Reading output
             print(segments)
             
         return 0
